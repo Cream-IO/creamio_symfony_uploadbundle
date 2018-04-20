@@ -6,10 +6,11 @@
     <services>
         <!-- SERVICES -->
         <service id="cream_io_upload.uploaderservice" class="CreamIO\UploadBundle\Service\UploaderService">
-            <argument type="string" id="%upload_directory%" />
+            <argument type="string">%upload_directory%</argument>
             <argument type="service" id="cream_io_user.apiservice" />
             <argument type="service" id="validator" />
         </service>
+        <service id="CreamIO\UploadBundle\Service\UploaderService" alias="cream_io_upload.uploaderservice" />
         <!-- REPOSITORIES -->
         <service id="CreamIO\UploadBundle\Repository\UserStoredFileRepository" public="false">
             <tag name="doctrine.repository_service" />
