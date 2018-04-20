@@ -101,12 +101,8 @@ class UploaderService
      */
     public function handleUpload(Request $request, bool $validate = true, ?string $classToGenerate = null, ?string $fileField = null): UserStoredFile
     {
-        if (null === $fileField) {
-            $fileField = $this->defaultClassFileField;
-        }
-        if (null === $classToGenerate) {
-            $classToGenerate = $this->defaultClassToGenerate;
-        }
+        $fileField = $fileField ?? $this->defaultClassFileField;
+        $classToGenerate = $classToGenerate ?? $this->defaultClassToGenerate;
         $file = $request->files->get('uploaded_file');
         /** @var UploadedFile $file */
         $filename = $this->move($file);
