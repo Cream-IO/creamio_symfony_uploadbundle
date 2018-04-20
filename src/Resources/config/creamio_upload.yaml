@@ -1,0 +1,4 @@
+creamio_upload:
+    upload_directory: '%kernel.project_dir%/public/uploads'
+    default_upload_file_class: 'App\Entity\Avatar'
+    default_upload_file_field: 'file'
