@@ -21,10 +21,8 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
  */
 class UploaderService
 {
-    /**
-     * Returned error title
-     */
     private const BAD_CLASSNAME_ERROR = "The classname provided to generate uploaded file does not extends UserStoredFile.";
+    private const NOT_EXISTING_CLASS_PROPERTY_ERROR = "The property provided for file name store does not exist.";
 
     /**
      * @var APIService Injected API service
@@ -64,6 +62,11 @@ class UploaderService
     {
         if (false === is_subclass_of($defaultClassToGenerate, 'CreamIO\UploadBundle\Model\UserStoredFile')) {
             $APIError = new APIError(Response::HTTP_INTERNAL_SERVER_ERROR, SELF::BAD_CLASSNAME_ERROR);
+
+            throw new APIException($APIError);
+        }
+        if (false === property_exists($defaultClassToGenerate, $defaultClassFileField)) {
+            $APIError = new APIError(Response::HTTP_INTERNAL_SERVER_ERROR, SELF::NOT_EXISTING_CLASS_PROPERTY_ERROR);
 
             throw new APIException($APIError);
         }
