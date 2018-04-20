@@ -45,36 +45,49 @@ class UploaderService
     private $defaultClassToGenerate;
 
     /**
-     * @var string Injected default file field for default file upload entity
+     * @var string Injected default file property for default file upload entity
      */
-    private $defaultClassFileField;
+    private $defaultClassFileProperty;
 
     /**
      * UploaderService constructor.
      *
-     * @param string             $targetDirectory        Target upload directory, injected from config file
-     * @param string             $defaultClassToGenerate Classname to generate by default if not provided in handleUpload method. Example : "App\Entity\GalleryImage"
-     * @param string             $defaultClassFileField  Field in the file upload entity that contain the file name by default if not provided in handleUpload
-     * @param APIService         $apiService             Injected API service from base bundle
-     * @param ValidatorInterface $validator              Injected validator service
+     * @param string             $targetDirectory           Target upload directory, injected from config file
+     * @param string             $defaultClassToGenerate    Classname to generate by default if not provided in handleUpload method. Example : "App\Entity\GalleryImage"
+     * @param string             $defaultClassFileProperty  Property in the file upload entity that contain the file name by default if not provided in handleUpload
+     * @param APIService         $apiService                Injected API service from base bundle
+     * @param ValidatorInterface $validator                 Injected validator service
      */
-    public function __construct(string $targetDirectory, string $defaultClassToGenerate, string $defaultClassFileField, APIService $apiService, ValidatorInterface $validator)
+    public function __construct(string $targetDirectory, string $defaultClassToGenerate, string $defaultClassFileProperty, APIService $apiService, ValidatorInterface $validator)
     {
-        if (false === is_subclass_of($defaultClassToGenerate, 'CreamIO\UploadBundle\Model\UserStoredFile')) {
-            $APIError = new APIError(Response::HTTP_INTERNAL_SERVER_ERROR, SELF::BAD_CLASSNAME_ERROR);
-
-            throw new APIException($APIError);
-        }
-        if (false === property_exists($defaultClassToGenerate, $defaultClassFileField)) {
-            $APIError = new APIError(Response::HTTP_INTERNAL_SERVER_ERROR, SELF::NOT_EXISTING_CLASS_PROPERTY_ERROR);
-
-            throw new APIException($APIError);
-        }
+        $this->checkClass($defaultClassToGenerate, $defaultClassFileProperty);
         $this->apiService = $apiService;
         $this->targetDirectory = $targetDirectory;
         $this->validator = $validator;
         $this->defaultClassToGenerate = $defaultClassToGenerate;
-        $this->defaultClassFileField = $defaultClassFileField;
+        $this->defaultClassFileProperty = $defaultClassFileProperty;
+    }
+
+    /**
+     * Check if class name provided implements UserStoredFile::class and provided file property exists
+     *
+     * @param string $classToGenerate Classname to generate
+     * @param string $fileProperty    Property in the file upload entity that contain the file name
+     *
+     * @throws APIException If validation failed, with message
+     */
+    public function checkClass(string $classToGenerate, string $fileProperty): void
+    {
+        if (false === is_subclass_of($classToGenerate, UserStoredFile::class)) {
+            $APIError = new APIError(Response::HTTP_INTERNAL_SERVER_ERROR, SELF::BAD_CLASSNAME_ERROR);
+
+            throw new APIException($APIError);
+        }
+        if (false === property_exists($classToGenerate, $fileProperty)) {
+            $APIError = new APIError(Response::HTTP_INTERNAL_SERVER_ERROR, SELF::NOT_EXISTING_CLASS_PROPERTY_ERROR);
+
+            throw new APIException($APIError);
+        }
     }
 
     /**
@@ -98,18 +111,19 @@ class UploaderService
      * @param Request     $request          Handled HTTP request
      * @param bool        $validate         Validate or not the entity during upload processing ? Useful when you need to add some parameters to the entity before validation
      * @param null|string $classToGenerate  Classname to generate. Example : "App\Entity\GalleryImage" or GalleryImage::class
-     * @param null|string $fileField        Field in the file upload entity that contain the file name
+     * @param null|string $fileProperty     Property in the file upload entity that contain the file name
      *
      * @return UserStoredFile File upload entity
      */
-    public function handleUpload(Request $request, bool $validate = true, ?string $classToGenerate = null, ?string $fileField = null): UserStoredFile
+    public function handleUpload(Request $request, bool $validate = true, ?string $classToGenerate = null, ?string $fileProperty = null): UserStoredFile
     {
-        $fileField = $fileField ?? $this->defaultClassFileField;
+        $fileProperty = $fileProperty ?? $this->defaultClassFileProperty;
         $classToGenerate = $classToGenerate ?? $this->defaultClassToGenerate;
+        $this->checkClass($classToGenerate, $fileProperty);
         $file = $request->files->get('uploaded_file');
         /** @var UploadedFile $file */
         $filename = $this->move($file);
-        $uploadedFile = $this->denormalizeEntity($request, $classToGenerate, $fileField, $filename);
+        $uploadedFile = $this->denormalizeEntity($request, $classToGenerate, $fileProperty, $filename);
         if ($validate) {
             $this->validateEntity($uploadedFile);
         }
@@ -122,15 +136,15 @@ class UploaderService
      *
      * @param Request $request          Handled HTTP request
      * @param string  $classToGenerate  Classname to generate. Example : "App\Entity\GalleryImage"
-     * @param string  $fileField        Field in your entity that contain the file name
-     * @param string  $filename         Filename to put in file field
+     * @param string  $fileProperty     Property in your entity that contain the file name
+     * @param string  $filename         Filename to store in file property
      *
      * @return UserStoredFile File upload entity
      */
-    private function denormalizeEntity(Request $request, string $classToGenerate, string $fileField, string $filename): UserStoredFile
+    private function denormalizeEntity(Request $request, string $classToGenerate, string $fileProperty, string $filename): UserStoredFile
     {
         $postDatas = $request->request->all();
-        $postDatas[$fileField] = $filename;
+        $postDatas[$fileProperty] = $filename;
 
         return $this->generateSerializer()->denormalize($postDatas, $classToGenerate);
     }
