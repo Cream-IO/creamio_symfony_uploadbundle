@@ -4,10 +4,12 @@ namespace CreamIO\UploadBundle\Service;
 
 use CreamIO\UploadBundle\Model\UserStoredFile;
 use CreamIO\BaseBundle\Exceptions\APIException;
+use CreamIO\BaseBundle\Exceptions\APIError;
 use CreamIO\BaseBundle\Service\APIService;
 use GBProd\UuidNormalizer\UuidNormalizer;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
@@ -19,6 +21,11 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
  */
 class UploaderService
 {
+    /**
+     * Returned error title
+     */
+    const BAD_CLASSNAME_ERROR = "The classname provided to generate uploaded file does not extends UserStoredFile.";
+
     /**
      * @var APIService Injected API service
      */
@@ -47,14 +54,19 @@ class UploaderService
     /**
      * UploaderService constructor.
      *
-     * @param string             $targetDirectory
-     * @param string             $defaultClassToGenerate
-     * @param string             $defaultClassFileField
-     * @param APIService         $apiService
-     * @param ValidatorInterface $validator
+     * @param string             $targetDirectory        Target upload directory, injected from config file
+     * @param string             $defaultClassToGenerate Classname to generate by default if not provided in handleUpload method. Example : "App\Entity\GalleryImage"
+     * @param string             $defaultClassFileField  Field in the file upload entity that contain the file name by default if not provided in handleUpload
+     * @param APIService         $apiService             Injected API service from base bundle
+     * @param ValidatorInterface $validator              Injected validator service
      */
     public function __construct(string $targetDirectory, string $defaultClassToGenerate, string $defaultClassFileField, APIService $apiService, ValidatorInterface $validator)
     {
+        if (false === is_subclass_of($defaultClassToGenerate, 'CreamIO\UploadBundle\Model\UserStoredFile')) {
+            $APIError = new APIError(Response::HTTP_INTERNAL_SERVER_ERROR, SELF::BAD_CLASSNAME_ERROR);
+
+            throw new APIException($APIError);
+        }
         $this->apiService = $apiService;
         $this->targetDirectory = $targetDirectory;
         $this->validator = $validator;
@@ -82,8 +94,8 @@ class UploaderService
      *
      * @param Request     $request          Handled HTTP request
      * @param bool        $validate         Validate or not the entity during upload processing ? Useful when you need to add some parameters to the entity before validation
-     * @param null|string $classToGenerate  The classname to generate. Example : "App\Entity\GalleryImage"
-     * @param null|string $fileField        The field in your entity that contain the file name
+     * @param null|string $classToGenerate  Classname to generate. Example : "App\Entity\GalleryImage"
+     * @param null|string $fileField        Field in the file upload entity that contain the file name
      *
      * @return UserStoredFile File upload entity
      */
@@ -93,14 +105,12 @@ class UploaderService
             $fileField = $this->defaultClassFileField;
         }
         if (null === $classToGenerate) {
-            $classToHydrate = $this->defaultClassToGenerate;
+            $classToGenerate = $this->defaultClassToGenerate;
         }
         $file = $request->files->get('uploaded_file');
         /** @var UploadedFile $file */
         $filename = $this->move($file);
-        $postDatas = $request->request->all();
-        $postDatas[$fileField] = $filename;
-        $uploadedFile = $this->generateSerializer()->denormalize($postDatas, $classToHydrate);
+        $uploadedFile = $this->denormalizeEntity($request, $classToGenerate, $fileField, $filename);
         if ($validate) {
             $this->validateEntity($uploadedFile);
         }
@@ -109,11 +119,29 @@ class UploaderService
     }
 
     /**
+     * Generate a file upload entity.
+     *
+     * @param Request $request          Handled HTTP request
+     * @param string  $classToGenerate  Classname to generate. Example : "App\Entity\GalleryImage"
+     * @param string  $fileField        Field in your entity that contain the file name
+     * @param string  $filename         Filename to put in file field
+     *
+     * @return UserStoredFile File upload entity
+     */
+    public function denormalizeEntity(Request $request, string $classToGenerate, string $fileField, string $filename): UserStoredFile
+    {
+        $postDatas = $request->request->all();
+        $postDatas[$fileField] = $filename;
+
+        return $this->generateSerializer()->denormalize($postDatas, $classToGenerate);
+    }
+
+    /**
      * Validates the file upload entity.
      *
      * @param UserStoredFile $uploadedFile
      *
-     * @throws APIException
+     * @throws APIException If validation failed, contains violations list
      */
     public function validateEntity(UserStoredFile $uploadedFile)
     {
@@ -132,7 +160,7 @@ class UploaderService
      */
     public function move(UploadedFile $file): string
     {
-        $fileName = md5(uniqid()).'.'.$file->guessExtension();
+        $fileName = $this->generateUniqueFilename($file->guessExtension());
         $file->move($this->getTargetDirectory(), $fileName);
 
         return $fileName;
@@ -141,11 +169,18 @@ class UploaderService
     /**
      * Generated a md5 filename based on uniqid.
      *
+     * @param null|string $fileExtension
+     *
      * @return string
      */
-    public function generateUniqueFilename(): string
+    public function generateUniqueFilename(?string $fileExtension): string
     {
-        return md5(uniqid('creamio_', true));
+        $uniqueName = md5(uniqid());
+        if(null !== $fileExtension) {
+            $uniqueName = sprintf('%s.%s', $uniqueName, $fileExtension);
+        }
+
+        return $uniqueName;
     }
 
     /**
