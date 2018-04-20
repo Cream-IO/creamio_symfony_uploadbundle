@@ -37,7 +37,7 @@ class UploaderService
     /**
      * @var string Injected default file upload entity from config
      */
-    private $defaultClassToHydrate;
+    private $defaultClassToGenerate;
 
     /**
      * @var string Injected default file field for default file upload entity
@@ -48,17 +48,17 @@ class UploaderService
      * UploaderService constructor.
      *
      * @param string             $targetDirectory
-     * @param string             $defaultClassToHydrate
+     * @param string             $defaultClassToGenerate
      * @param string             $defaultClassFileField
      * @param APIService         $apiService
      * @param ValidatorInterface $validator
      */
-    public function __construct(string $targetDirectory, string $defaultClassToHydrate, string $defaultClassFileField, APIService $apiService, ValidatorInterface $validator)
+    public function __construct(string $targetDirectory, string $defaultClassToGenerate, string $defaultClassFileField, APIService $apiService, ValidatorInterface $validator)
     {
         $this->apiService = $apiService;
         $this->targetDirectory = $targetDirectory;
         $this->validator = $validator;
-        $this->defaultClassToHydrate = $defaultClassToHydrate;
+        $this->defaultClassToGenerate = $defaultClassToGenerate;
         $this->defaultClassFileField = $defaultClassFileField;
     }
 
@@ -78,22 +78,22 @@ class UploaderService
     }
 
     /**
-     * Main upload handling method, moves the file and hydrates the file upload entity.
+     * Main upload handling method, moves the file and generate the file upload entity.
      *
-     * @param Request     $request
-     * @param bool        $validate
-     * @param null|string $classToHydrate
-     * @param null|string $fileField
+     * @param Request     $request          Handled HTTP request
+     * @param bool        $validate         Validate or not the entity during upload processing ? Useful when you need to add some parameters to the entity before validation
+     * @param null|string $classToGenerate  The classname to generate. Example : "App\Entity\GalleryImage"
+     * @param null|string $fileField        The field in your entity that contain the file name
      *
-     * @return object File upload entity
+     * @return UserStoredFile File upload entity
      */
-    public function handleUpload(Request $request, bool $validate = true, ?string $classToHydrate = null, ?string $fileField = null)
+    public function handleUpload(Request $request, bool $validate = true, ?string $classToGenerate = null, ?string $fileField = null): UserStoredFile
     {
         if (null === $fileField) {
             $fileField = $this->defaultClassFileField;
         }
-        if (null === $classToHydrate) {
-            $classToHydrate = $this->defaultClassToHydrate;
+        if (null === $classToGenerate) {
+            $classToHydrate = $this->defaultClassToGenerate;
         }
         $file = $request->files->get('uploaded_file');
         /** @var UploadedFile $file */
