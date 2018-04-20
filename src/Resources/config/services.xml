@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services
+        http://symfony.com/schema/dic/services/services-1.0.xsd">
+    <services>
+        <!-- SERVICES -->
+        <service id="cream_io_upload.uploaderservice" class="CreamIO\UploadBundle\Service\UploaderService">
+            <argument type="string" id="%upload_directory%" />
+            <argument type="service" id="cream_io_user.apiservice" />
+            <argument type="service" id="validator" />
+        </service>
+        <!-- REPOSITORIES -->
+        <service id="CreamIO\UploadBundle\Repository\UserStoredFileRepository" public="false">
+            <tag name="doctrine.repository_service" />
+            <argument type="service" id="doctrine" />
+        </service>
+    </services>
+</container>
