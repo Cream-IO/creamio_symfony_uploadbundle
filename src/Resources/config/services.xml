@@ -11,10 +11,5 @@
             <argument type="service" id="validator" />
         </service>
         <service id="CreamIO\UploadBundle\Service\UploaderService" alias="cream_io_upload.uploaderservice" />
-        <!-- REPOSITORIES -->
-        <service id="CreamIO\UploadBundle\Repository\UserStoredFileRepository" public="false">
-            <tag name="doctrine.repository_service" />
-            <argument type="service" id="doctrine" />
-        </service>
     </services>
 </container>
