@@ -21,11 +21,17 @@ class UploaderService
 
     private $validator;
 
-    public function __construct(string $targetDirectory, APIService $apiService, ValidatorInterface $validator)
+    private $defaultClassToHydrate;
+
+    private $defaultClassFileField;
+
+    public function __construct(string $targetDirectory, string $defaultClassToHydrate, string $defaultClassFileField, APIService $apiService, ValidatorInterface $validator)
     {
         $this->apiService = $apiService;
         $this->targetDirectory = $targetDirectory;
         $this->validator = $validator;
+        $this->defaultClassToHydrate = $defaultClassToHydrate;
+        $this->defaultClassFileField = $defaultClassFileField;
     }
 
     public function generateSerializer(): Serializer
@@ -38,15 +44,23 @@ class UploaderService
         return $serializer;
     }
 
-    public function handleUpload(Request $request): UserStoredFile
+    public function handleUpload(Request $request, bool $validate = true, $classToHydrate = null, $fileField = null)
     {
+        if(!$fileField) {
+            $fileField = $this->defaultClassFileField;
+        }
+        if(!$classToHydrate) {
+            $classToHydrate = $this->defaultClassToHydrate;
+        }
         $file = $request->files->get('uploaded_file');
         /** @var UploadedFile $file */
         $filename = $this->move($file);
         $postDatas = $request->request->all();
-        $postDatas['file'] = $filename;
-        $uploadedFile = $this->generateSerializer()->denormalize($postDatas, UserStoredFile::class);
-        $this->validateEntity($uploadedFile);
+        $postDatas[$fileField] = $filename;
+        $uploadedFile = $this->generateSerializer()->denormalize($postDatas, $classToHydrate);
+        if($validate) {
+            $this->validateEntity($uploadedFile);
+        }
 
         return $uploadedFile;
     }
