@@ -6,8 +6,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * @ORM\Entity(repositoryClass="CreamIO\UploadBundle\Repository\UserStoredFileRepository")
- * @ORM\Table(name="creamio_uploaded_files")
+ * @ORM\MappedSuperclass
  */
 class UserStoredFile
 {
