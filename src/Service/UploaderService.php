@@ -24,7 +24,7 @@ class UploaderService
     /**
      * Returned error title
      */
-    const BAD_CLASSNAME_ERROR = "The classname provided to generate uploaded file does not extends UserStoredFile.";
+    private const BAD_CLASSNAME_ERROR = "The classname provided to generate uploaded file does not extends UserStoredFile.";
 
     /**
      * @var APIService Injected API service
@@ -79,7 +79,7 @@ class UploaderService
      *
      * @return Serializer
      */
-    public function generateSerializer(): Serializer
+    private function generateSerializer(): Serializer
     {
         $encoders = [new JsonEncoder()];
         $objectNormalizer = new ObjectNormalizer();
@@ -124,7 +124,7 @@ class UploaderService
      *
      * @return UserStoredFile File upload entity
      */
-    public function denormalizeEntity(Request $request, string $classToGenerate, string $fileField, string $filename): UserStoredFile
+    private function denormalizeEntity(Request $request, string $classToGenerate, string $fileField, string $filename): UserStoredFile
     {
         $postDatas = $request->request->all();
         $postDatas[$fileField] = $filename;
@@ -154,7 +154,7 @@ class UploaderService
      *
      * @return string Filename
      */
-    public function move(UploadedFile $file): string
+    private function move(UploadedFile $file): string
     {
         $fileName = $this->generateUniqueFilename($file->guessExtension());
         $file->move($this->getTargetDirectory(), $fileName);
@@ -169,7 +169,7 @@ class UploaderService
      *
      * @return string
      */
-    public function generateUniqueFilename(?string $fileExtension): string
+    private function generateUniqueFilename(?string $fileExtension): string
     {
         $uniqueName = md5(uniqid());
         if(null !== $fileExtension) {
