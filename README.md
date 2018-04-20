@@ -169,12 +169,12 @@ You can specify some parameters to the handleUpload method, here is the function
      *
      * @param Request     $request          Handled HTTP request
      * @param bool        $validate         Validate or not the entity during upload processing ? Useful when you need to add some parameters to the entity before validation
-     * @param null|string $classToGenerate  The classname to generate. Example : "App\Entity\GalleryImage"
-     * @param null|string $fileField        The field in your entity that contain the file name
+     * @param null|string $classToGenerate  Classname to generate. Example : "App\Entity\GalleryImage" or GalleryImage::class
+     * @param null|string $fileProperty     Property in the file upload entity that contain the file name
      *
      * @return UserStoredFile File upload entity
      */
-    public function handleUpload(Request $request, bool $validate = true, ?string $classToGenerate = null, ?string $fileField = null): UserStoredFile
+    public function handleUpload(Request $request, bool $validate = true, ?string $classToGenerate = null, ?string $fileProperty = null): UserStoredFile
 ```
 
 Project tree
