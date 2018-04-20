@@ -3,8 +3,8 @@
 namespace CreamIO\UploadBundle\Service;
 
 use CreamIO\UploadBundle\Model\UserStoredFile;
-use CreamIO\UserBundle\Exceptions\APIException;
-use CreamIO\UserBundle\Service\APIService;
+use CreamIO\BaseBundle\Exceptions\APIException;
+use CreamIO\BaseBundle\Service\APIService;
 use GBProd\UuidNormalizer\UuidNormalizer;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
