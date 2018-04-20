@@ -94,7 +94,7 @@ class UploaderService
      *
      * @param Request     $request          Handled HTTP request
      * @param bool        $validate         Validate or not the entity during upload processing ? Useful when you need to add some parameters to the entity before validation
-     * @param null|string $classToGenerate  Classname to generate. Example : "App\Entity\GalleryImage"
+     * @param null|string $classToGenerate  Classname to generate. Example : "App\Entity\GalleryImage" or GalleryImage::class
      * @param null|string $fileField        Field in the file upload entity that contain the file name
      *
      * @return UserStoredFile File upload entity
