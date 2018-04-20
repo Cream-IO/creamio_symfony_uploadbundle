@@ -1,7 +1,7 @@
 {
   "type": "symfony-bundle",
   "license": "proprietary",
-  "name": "qraimbault/creamio_symfony_uploadbundle",
+  "name": "creamio/symfony_uploadbundle",
   "description": "Simple library to handle file uploads for CreamIO projects in symfony",
   "authors": [
     {
@@ -20,7 +20,7 @@
     "symfony/framework-bundle": "^4.0",
     "symfony/orm-pack": "^1.0",
     "symfony/validator": "^4.0",
-    "qraimbault/creamio_symfony_basebundle": "^0"
+    "creamio/symfony_basebundle": "^0"
   },
   "require-dev": {
     "behat/behat": "^3.4",
