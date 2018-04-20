@@ -2,7 +2,7 @@
 
 namespace CreamIO\UploadBundle\Service;
 
-use CreamIO\UploadBundle\Entity\UserStoredFile;
+use CreamIO\UploadBundle\Model\UserStoredFile;
 use CreamIO\UserBundle\Service\APIService;
 use GBProd\UuidNormalizer\UuidNormalizer;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -44,7 +44,7 @@ class UploaderService
         return $serializer;
     }
 
-    public function handleUpload(Request $request, bool $validate = true, $classToHydrate = null, $fileField = null)
+    public function handleUpload(Request $request, $classToHydrate = null, $fileField = null)
     {
         if(!$fileField) {
             $fileField = $this->defaultClassFileField;
@@ -58,9 +58,7 @@ class UploaderService
         $postDatas = $request->request->all();
         $postDatas[$fileField] = $filename;
         $uploadedFile = $this->generateSerializer()->denormalize($postDatas, $classToHydrate);
-        if($validate) {
-            $this->validateEntity($uploadedFile);
-        }
+        $this->validateEntity($uploadedFile);
 
         return $uploadedFile;
     }

@@ -15,19 +15,19 @@ class UserStoredFile
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
      */
-    private $id;
+    protected $id;
 
     /**
      * @ORM\Column(type="string")
      *
      * @Assert\NotBlank(message="No file provided.")
      */
-    private $file;
+    protected $file;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $createdAt;
+    protected $createdAt;
 
     public function __construct()
     {
