@@ -95,21 +95,3 @@ fabric.properties
 ###> behat/symfony2-extension ###
 behat.yml
 ###< behat/symfony2-extension ###
-.env.dist
-.php_cs.dist
-behat.yml.dist
-bin/
-composer.lock
-config/
-features/
-phpunit.xml.dist
-public/
-src/Controller/
-src/DataFixtures/
-src/Entity/
-src/Kernel.php
-src/Migrations/
-src/Repository/
-symfony.lock
-tests/
-translations/
