@@ -21,8 +21,8 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
  */
 class UploaderService
 {
-    private const BAD_CLASSNAME_ERROR = "The classname provided to generate uploaded file does not extends UserStoredFile.";
-    private const NOT_EXISTING_CLASS_PROPERTY_ERROR = "The property provided for file name store does not exist.";
+    private const BAD_CLASSNAME_ERROR = 'The classname provided to generate uploaded file does not extends UserStoredFile.';
+    private const NOT_EXISTING_CLASS_PROPERTY_ERROR = 'The property provided for file name store does not exist.';
 
     /**
      * @var APIService Injected API service
@@ -100,9 +100,8 @@ class UploaderService
         $encoders = [new JsonEncoder()];
         $objectNormalizer = new ObjectNormalizer();
         $normalizers = [new DateTimeNormalizer('d-m-Y H:i:s'), $objectNormalizer, new UuidNormalizer()];
-        $serializer = new Serializer($normalizers, $encoders);
 
-        return $serializer;
+        return new Serializer($normalizers, $encoders);
     }
 
     /**
@@ -156,10 +155,10 @@ class UploaderService
      *
      * @throws APIException If validation failed, contains violations list
      */
-    public function validateEntity(UserStoredFile $uploadedFile)
+    public function validateEntity(UserStoredFile $uploadedFile): void
     {
         $validationErrors = $this->validator->validate($uploadedFile);
-        if (count($validationErrors) > 0) {
+        if (\count($validationErrors) > 0) {
             throw $this->apiService->postError($validationErrors);
         }
     }
@@ -188,7 +187,7 @@ class UploaderService
      */
     private function generateUniqueFilename(?string $fileExtension): string
     {
-        $uniqueName = md5(uniqid());
+        $uniqueName = md5(uniqid('creamio_upload_', true));
         if(null !== $fileExtension) {
             $uniqueName = sprintf('%s.%s', $uniqueName, $fileExtension);
         }
@@ -201,7 +200,7 @@ class UploaderService
      *
      * @return string
      */
-    public function getTargetDirectory()
+    public function getTargetDirectory(): string
     {
         return $this->targetDirectory;
     }

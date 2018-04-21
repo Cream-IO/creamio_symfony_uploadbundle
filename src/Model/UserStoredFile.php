@@ -21,6 +21,7 @@ class UserStoredFile
      * @ORM\Column(type="string")
      *
      * @Assert\NotBlank(message="No file provided.")
+     * @Assert\File()
      */
     protected $file;
 
