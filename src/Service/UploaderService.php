@@ -187,9 +187,9 @@ class UploaderService
      */
     private function generateUniqueFilename(?string $fileExtension): string
     {
-        $uniqueName = md5(uniqid('creamio_upload_', true));
+        $uniqueName = \md5(\uniqid('creamio_upload_', true));
         if(null !== $fileExtension) {
-            $uniqueName = sprintf('%s.%s', $uniqueName, $fileExtension);
+            $uniqueName = \sprintf('%s.%s', $uniqueName, $fileExtension);
         }
 
         return $uniqueName;
