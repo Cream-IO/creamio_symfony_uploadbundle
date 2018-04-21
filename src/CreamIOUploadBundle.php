@@ -12,6 +12,7 @@ class CreamIOUploadBundle extends Bundle
         if (null === $this->extension) {
             $this->extension = new CreamIOUploadExtension();
         }
+
         return $this->extension;
     }
 }

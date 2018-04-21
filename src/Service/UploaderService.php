@@ -2,10 +2,10 @@
 
 namespace CreamIO\UploadBundle\Service;
 
-use CreamIO\UploadBundle\Model\UserStoredFile;
-use CreamIO\BaseBundle\Exceptions\APIException;
 use CreamIO\BaseBundle\Exceptions\APIError;
+use CreamIO\BaseBundle\Exceptions\APIException;
 use CreamIO\BaseBundle\Service\APIService;
+use CreamIO\UploadBundle\Model\UserStoredFile;
 use GBProd\UuidNormalizer\UuidNormalizer;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
@@ -52,11 +52,13 @@ class UploaderService
     /**
      * UploaderService constructor.
      *
-     * @param string             $targetDirectory           Target upload directory, injected from config file
-     * @param string             $defaultClassToGenerate    Classname to generate by default if not provided in handleUpload method. Example : "App\Entity\GalleryImage"
-     * @param string             $defaultClassFileProperty  Property in the file upload entity that contain the file name by default if not provided in handleUpload
-     * @param APIService         $apiService                Injected API service from base bundle
-     * @param ValidatorInterface $validator                 Injected validator service
+     * @param string             $targetDirectory          Target upload directory, injected from config file
+     * @param string             $defaultClassToGenerate   Classname to generate by default if not provided in handleUpload method. Example : "App\Entity\GalleryImage"
+     * @param string             $defaultClassFileProperty Property in the file upload entity that contain the file name by default if not provided in handleUpload
+     * @param APIService         $apiService               Injected API service from base bundle
+     * @param ValidatorInterface $validator                Injected validator service
+     *
+     * @throws APIException If class check fails
      */
     public function __construct(string $targetDirectory, string $defaultClassToGenerate, string $defaultClassFileProperty, APIService $apiService, ValidatorInterface $validator)
     {
@@ -69,7 +71,7 @@ class UploaderService
     }
 
     /**
-     * Check if class name provided implements UserStoredFile::class and provided file property exists
+     * Check if class name provided implements UserStoredFile::class and provided file property exists.
      *
      * @param string $classToGenerate Classname to generate
      * @param string $fileProperty    Property in the file upload entity that contain the file name
@@ -79,12 +81,12 @@ class UploaderService
     public function checkClass(string $classToGenerate, string $fileProperty): void
     {
         if (false === \is_subclass_of($classToGenerate, UserStoredFile::class)) {
-            $APIError = new APIError(Response::HTTP_INTERNAL_SERVER_ERROR, SELF::BAD_CLASSNAME_ERROR);
+            $APIError = new APIError(Response::HTTP_INTERNAL_SERVER_ERROR, self::BAD_CLASSNAME_ERROR);
 
             throw new APIException($APIError);
         }
         if (false === \property_exists($classToGenerate, $fileProperty)) {
-            $APIError = new APIError(Response::HTTP_INTERNAL_SERVER_ERROR, SELF::NOT_EXISTING_CLASS_PROPERTY_ERROR);
+            $APIError = new APIError(Response::HTTP_INTERNAL_SERVER_ERROR, self::NOT_EXISTING_CLASS_PROPERTY_ERROR);
 
             throw new APIException($APIError);
         }
@@ -107,10 +109,12 @@ class UploaderService
     /**
      * Main upload handling method, moves the file and generate the file upload entity.
      *
-     * @param Request     $request          Handled HTTP request
-     * @param bool        $validate         Validate or not the entity during upload processing ? Useful when you need to add some parameters to the entity before validation
-     * @param null|string $classToGenerate  Classname to generate. Example : "App\Entity\GalleryImage" or GalleryImage::class
-     * @param null|string $fileProperty     Property in the file upload entity that contain the file name
+     * @param Request     $request         Handled HTTP request
+     * @param bool        $validate        Validate or not the entity during upload processing ? Useful when you need to add some parameters to the entity before validation
+     * @param null|string $classToGenerate Classname to generate. Example : "App\Entity\GalleryImage" or GalleryImage::class
+     * @param null|string $fileProperty    Property in the file upload entity that contain the file name
+     *
+     * @throws APIException If class check fails
      *
      * @return UserStoredFile File upload entity
      */
@@ -133,10 +137,10 @@ class UploaderService
     /**
      * Generate a file upload entity.
      *
-     * @param Request $request          Handled HTTP request
-     * @param string  $classToGenerate  Classname to generate. Example : "App\Entity\GalleryImage"
-     * @param string  $fileProperty     Property in your entity that contain the file name
-     * @param string  $filename         Filename to store in file property
+     * @param Request $request         Handled HTTP request
+     * @param string  $classToGenerate Classname to generate. Example : "App\Entity\GalleryImage"
+     * @param string  $fileProperty    Property in your entity that contain the file name
+     * @param string  $filename        Filename to store in file property
      *
      * @return UserStoredFile File upload entity
      */
@@ -188,7 +192,7 @@ class UploaderService
     private function generateUniqueFilename(?string $fileExtension): string
     {
         $uniqueName = \md5(\uniqid('creamio_upload_', true));
-        if(null !== $fileExtension) {
+        if (null !== $fileExtension) {
             $uniqueName = \sprintf('%s.%s', $uniqueName, $fileExtension);
         }
 
