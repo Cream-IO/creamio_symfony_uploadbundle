@@ -193,12 +193,11 @@ class UploaderService
      *
      * @return File Filename
      */
-    private function move(UploadedFile $file): File
+    private function move(File $file): File
     {
         $fileName = $this->generateUniqueFilename($file->guessExtension());
-        $finalFile = $file->move($this->getTargetDirectory(), $fileName);
 
-        return $finalFile;
+        return $file->move($this->getTargetDirectory(), $fileName);
     }
 
     /**

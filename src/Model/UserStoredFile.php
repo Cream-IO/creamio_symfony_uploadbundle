@@ -11,6 +11,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 class UserStoredFile
 {
     /**
+     * Auto increment id.
+     *
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
@@ -18,6 +20,8 @@ class UserStoredFile
     protected $id;
 
     /**
+     * Complete path to the uploaded file.
+     *
      * @ORM\Column(type="string")
      *
      * @Assert\NotBlank(message="No file provided.")
@@ -26,24 +30,33 @@ class UserStoredFile
     protected $file;
 
     /**
+     * Creation time.
+     *
      * @ORM\Column(type="datetime")
      */
     protected $createdAt;
 
+    /**
+     * UserStoredFile constructor.
+     */
     public function __construct()
     {
         $this->createdAt = new \DateTime();
     }
 
     /**
-     * @return mixed
+     * Id getter.
+     *
+     * @return null|integer
      */
-    public function getId()
+    public function getId(): ?int
     {
         return $this->id;
     }
 
     /**
+     * File path getter.
+     *
      * @return null|string
      */
     public function getFile(): ?string
@@ -52,6 +65,8 @@ class UserStoredFile
     }
 
     /**
+     * File path setter.
+     *
      * @param string $file
      *
      * @return UserStoredFile
@@ -64,22 +79,12 @@ class UserStoredFile
     }
 
     /**
+     * Creation time getter.
+     *
      * @return \DateTimeInterface|null
      */
     public function getCreatedAt(): ?\DateTimeInterface
     {
         return $this->createdAt;
-    }
-
-    /**
-     * @param \DateTimeInterface $createdAt
-     *
-     * @return UserStoredFile
-     */
-    public function setCreatedAt(\DateTimeInterface $createdAt): self
-    {
-        $this->createdAt = $createdAt;
-
-        return $this;
     }
 }
