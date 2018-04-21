@@ -48,7 +48,7 @@ class UserStoredFile
      */
     public function getFile(): ?string
     {
-        return $this->file;
+        return \basename($this->file);
     }
 
     /**

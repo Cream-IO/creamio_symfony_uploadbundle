@@ -7,6 +7,7 @@ use CreamIO\BaseBundle\Exceptions\APIException;
 use CreamIO\BaseBundle\Service\APIService;
 use CreamIO\UploadBundle\Model\UserStoredFile;
 use GBProd\UuidNormalizer\UuidNormalizer;
+use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,6 +24,7 @@ class UploaderService
 {
     private const BAD_CLASSNAME_ERROR = 'The classname provided to generate uploaded file does not extends UserStoredFile.';
     private const NOT_EXISTING_CLASS_PROPERTY_ERROR = 'The property provided for file name store does not exist.';
+    private const NO_FILE_PROVIDED_ERROR = 'No file provided.';
 
     /**
      * @var APIService Injected API service
@@ -100,10 +102,28 @@ class UploaderService
     private function generateSerializer(): Serializer
     {
         $encoders = [new JsonEncoder()];
-        $objectNormalizer = new ObjectNormalizer();
-        $normalizers = [new DateTimeNormalizer('d-m-Y H:i:s'), $objectNormalizer, new UuidNormalizer()];
+        $normalizers = [new DateTimeNormalizer('d-m-Y H:i:s'), new ObjectNormalizer()];
 
         return new Serializer($normalizers, $encoders);
+    }
+
+    /**
+     * Get file from the request and check it exists
+     *
+     * @param Request $request Handled HTTP request
+     *
+     * @throws APIException If no file was provided
+     *
+     * @return File
+     */
+    private function getFileFromRequest(Request $request): File
+    {
+        $tempFile = $request->files->get('uploaded_file');
+        if (null === $tempFile) {
+            throw $this->apiService->error(Response::HTTP_BAD_REQUEST, self::NO_FILE_PROVIDED_ERROR);
+        }
+
+        return $tempFile;
     }
 
     /**
@@ -114,7 +134,7 @@ class UploaderService
      * @param null|string $classToGenerate Classname to generate. Example : "App\Entity\GalleryImage" or GalleryImage::class
      * @param null|string $fileProperty    Property in the file upload entity that contain the file name
      *
-     * @throws APIException If class check fails
+     * @throws APIException If class check fails or no file provided
      *
      * @return UserStoredFile File upload entity
      */
@@ -123,10 +143,9 @@ class UploaderService
         $fileProperty = $fileProperty ?? $this->defaultClassFileProperty;
         $classToGenerate = $classToGenerate ?? $this->defaultClassToGenerate;
         $this->checkClass($classToGenerate, $fileProperty);
-        $file = $request->files->get('uploaded_file');
-        /** @var UploadedFile $file */
-        $filename = $this->move($file);
-        $uploadedFile = $this->denormalizeEntity($request, $classToGenerate, $fileProperty, $filename);
+        $tmpFile = $this->getFileFromRequest($request);
+        $file = $this->move($tmpFile);
+        $uploadedFile = $this->denormalizeEntity($request, $classToGenerate, $fileProperty, $file);
         if ($validate) {
             $this->validateEntity($uploadedFile);
         }
@@ -140,11 +159,11 @@ class UploaderService
      * @param Request $request         Handled HTTP request
      * @param string  $classToGenerate Classname to generate. Example : "App\Entity\GalleryImage"
      * @param string  $fileProperty    Property in your entity that contain the file name
-     * @param string  $filename        Filename to store in file property
+     * @param File  $filename        File to store in file upload entity
      *
      * @return UserStoredFile File upload entity
      */
-    private function denormalizeEntity(Request $request, string $classToGenerate, string $fileProperty, string $filename): UserStoredFile
+    private function denormalizeEntity(Request $request, string $classToGenerate, string $fileProperty, File $filename): UserStoredFile
     {
         $postDatas = $request->request->all();
         $postDatas[$fileProperty] = $filename;
@@ -172,14 +191,14 @@ class UploaderService
      *
      * @param UploadedFile $file
      *
-     * @return string Filename
+     * @return File Filename
      */
-    private function move(UploadedFile $file): string
+    private function move(UploadedFile $file): File
     {
         $fileName = $this->generateUniqueFilename($file->guessExtension());
-        $file->move($this->getTargetDirectory(), $fileName);
+        $finalFile = $file->move($this->getTargetDirectory(), $fileName);
 
-        return $fileName;
+        return $finalFile;
     }
 
     /**
