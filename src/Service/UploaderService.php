@@ -78,12 +78,12 @@ class UploaderService
      */
     public function checkClass(string $classToGenerate, string $fileProperty): void
     {
-        if (false === is_subclass_of($classToGenerate, UserStoredFile::class)) {
+        if (false === \is_subclass_of($classToGenerate, UserStoredFile::class)) {
             $APIError = new APIError(Response::HTTP_INTERNAL_SERVER_ERROR, SELF::BAD_CLASSNAME_ERROR);
 
             throw new APIException($APIError);
         }
-        if (false === property_exists($classToGenerate, $fileProperty)) {
+        if (false === \property_exists($classToGenerate, $fileProperty)) {
             $APIError = new APIError(Response::HTTP_INTERNAL_SERVER_ERROR, SELF::NOT_EXISTING_CLASS_PROPERTY_ERROR);
 
             throw new APIException($APIError);
