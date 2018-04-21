@@ -1,6 +1,6 @@
 {
   "type": "symfony-bundle",
-  "license": "proprietary",
+  "license": "CC-BY-NC-SA-4.0",
   "name": "creamio/symfony_uploadbundle",
   "description": "Simple library to handle file uploads for CreamIO projects in symfony",
   "authors": [
