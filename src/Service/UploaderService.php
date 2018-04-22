@@ -110,7 +110,7 @@ class UploaderService
      */
     private function getFileFromRequest(Request $request): File
     {
-        $tempFile = $request->files->get('uploaded_file');
+        $tempFile = $request->files->get('uploaded-file');
         if (null === $tempFile) {
             throw $this->apiService->error(Response::HTTP_BAD_REQUEST, self::NO_FILE_PROVIDED_ERROR);
         }
