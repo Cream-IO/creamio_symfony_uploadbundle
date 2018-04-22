@@ -58,16 +58,14 @@ class UploaderService
      * @param string             $defaultClassToGenerate   Classname to generate by default if not provided in handleUpload method. Example : "App\Entity\GalleryImage"
      * @param string             $defaultClassFileProperty Property in the file upload entity that contain the file name by default if not provided in handleUpload
      * @param APIService         $apiService               Injected API service from base bundle
-     * @param ValidatorInterface $validator                Injected validator service
      *
      * @throws APIException If class check fails
      */
-    public function __construct(string $targetDirectory, string $defaultClassToGenerate, string $defaultClassFileProperty, APIService $apiService, ValidatorInterface $validator)
+    public function __construct(string $targetDirectory, string $defaultClassToGenerate, string $defaultClassFileProperty, APIService $apiService)
     {
         $this->checkClass($defaultClassToGenerate, $defaultClassFileProperty);
         $this->apiService = $apiService;
         $this->targetDirectory = $targetDirectory;
-        $this->validator = $validator;
         $this->defaultClassToGenerate = $defaultClassToGenerate;
         $this->defaultClassFileProperty = $defaultClassFileProperty;
     }
@@ -147,7 +145,7 @@ class UploaderService
         $file = $this->move($tmpFile);
         $uploadedFile = $this->denormalizeEntity($request, $classToGenerate, $fileProperty, $file);
         if ($validate) {
-            $this->validateEntity($uploadedFile);
+            $this->apiService->validateEntity($uploadedFile);
         }
 
         return $uploadedFile;
@@ -169,21 +167,6 @@ class UploaderService
         $postDatas[$fileProperty] = $filename;
 
         return $this->generateSerializer()->denormalize($postDatas, $classToGenerate);
-    }
-
-    /**
-     * Validates the file upload entity.
-     *
-     * @param UserStoredFile $uploadedFile
-     *
-     * @throws APIException If validation failed, contains violations list
-     */
-    public function validateEntity(UserStoredFile $uploadedFile): void
-    {
-        $validationErrors = $this->validator->validate($uploadedFile);
-        if (\count($validationErrors) > 0) {
-            throw $this->apiService->postError($validationErrors);
-        }
     }
 
     /**

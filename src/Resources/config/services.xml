@@ -10,7 +10,6 @@
             <argument type="string">%default_upload_file_class%</argument>
             <argument type="string">%default_upload_file_field%</argument>
             <argument type="service" id="cream_io_base.apiservice" />
-            <argument type="service" id="validator" />
         </service>
         <service id="CreamIO\UploadBundle\Service\UploaderService" alias="cream_io_upload.uploaderservice" />
     </services>
