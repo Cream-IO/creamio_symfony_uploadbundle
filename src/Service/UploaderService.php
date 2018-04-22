@@ -15,7 +15,6 @@ use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
  * Class UploaderService.
@@ -35,11 +34,6 @@ class UploaderService
      * @var string Injected upload directory from config
      */
     private $targetDirectory;
-
-    /**
-     * @var ValidatorInterface Injected validator service
-     */
-    private $validator;
 
     /**
      * @var string Injected default file upload entity from config
