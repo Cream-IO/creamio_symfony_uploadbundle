@@ -18,6 +18,8 @@ Installation
 
 Require the bundle from a symfony 4 application.
 
+Make the base bundle configuration according to the [documentation](https://github.com/Cream-IO/symfony_basebundle/blob/master/README.md).
+
 Create an entity implementing CreamIO\UploadBundle\Model\UserStoredFile. Example:
 
 ```php
@@ -113,6 +115,9 @@ creamio_upload:
     default_upload_file_class: 'App\Entity\Avatar'
     default_upload_file_field: 'file'
 ```
+
+Usage
+-----
 
 Create a controller handling uploads. Example:
 
